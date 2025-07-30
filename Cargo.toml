@@ -1,0 +1,9 @@
+[package]
+name = "Zerust"
+version = "0.1.0"
+edition = "2024"
+authors = ["wuzu zhao yitongwuzu1992@gmail.com"]
+description = "Zero-cost Zinx for Rust"
+license = "MIT"
+
+[dependencies]
