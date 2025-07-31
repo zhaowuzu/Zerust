@@ -1,5 +1,5 @@
 [package]
-name = "Zerust"
+name = "zerust"
 version = "0.1.0"
 edition = "2024"
 authors = ["wuzu zhao yitongwuzu1992@gmail.com"]
@@ -7,3 +7,5 @@ description = "Zero-cost Zinx for Rust"
 license = "MIT"
 
 [dependencies]
+thiserror = "2.0.12"
+dashmap = "7.0.0-rc2"
