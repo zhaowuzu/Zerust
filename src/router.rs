@@ -3,7 +3,6 @@
 use crate::request::Request;
 use crate::response::Response;
 use dashmap::DashMap;
-use std::sync::Arc;
 
 // Send 超trait约束：表示该类型的所有权可以在不同的线程间安全转移
 // Sync 超trait约束：表示该类型的引用（&T）可以在多个线程间安全共享
