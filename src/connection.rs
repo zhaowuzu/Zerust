@@ -9,7 +9,7 @@ use std::net::SocketAddr;
 
 pub struct Connection {
     stream : TcpStream,
-    buffer:[u8;4096], // 一个大小为 4096 字节的固定大小的栈分配数组（缓冲区）
+    pending_data:Vec<u8>, // 用于存放从流中读取但尚未被应用层处理的数据
 }
 
 impl Connection {
@@ -18,7 +18,7 @@ impl Connection {
     pub fn new(stream: TcpStream)-> Self {
         Self {
             stream,
-            buffer:[0;4096],
+            pending_data:Vec::new(),
         }
     }
 
@@ -68,7 +68,7 @@ impl Connection {
 
     /// 从流中精确读取指定数量的字节数据
     ///
-    /// 该函数会持续从底层流中读取数据，直到读取到 exactly `size` 个字节或遇到错误为止。
+    /// 该函数会优先从 `pending_data` 中获取数据，如果不够则从流中读取。
     ///
     /// # 参数
     /// * `size` - 需要读取的字节数
@@ -76,18 +76,22 @@ impl Connection {
     /// # 返回值
     /// * `Ok(Vec<u8>)` - 成功读取的字节数据
     /// * `Err(ZerustError)` - 读取过程中发生的错误，包括连接关闭等
-    async fn read_exact(&mut self,size:usize) ->Result<Vec<u8>,ZerustError>{
-        let mut received = 0;
-        // 循环读取数据直到达到指定大小
-        while received < size {
-           let n = self.stream.read(&mut self.buffer).await?;
-            // 检查连接是否已关闭
-            if n==0 { // 在 TCP 连接中，read 返回 0 通常表示对端已经关闭了连接（EOF - End of File）
+    async fn read_exact(&mut self, size: usize) -> Result<Vec<u8>, ZerustError> {
+        // 首先检查 pending_data 中是否有足够的数据
+        while self.pending_data.len() < size {
+            // pending_data 中的数据不够，需要从流中读取更多
+            let mut buffer = [0u8; 1024]; // 临时缓冲区
+            let n = self.stream.read(&mut buffer).await?;
+            if n == 0 {
                 return Err(ZerustError::ConnectionClosed);
             }
-            received += n;
+            // 将新读取的数据追加到 pending_data
+            self.pending_data.extend_from_slice(&buffer[..n]);
         }
-        Ok(self.buffer[..size].to_vec())
+
+        // 现在 pending_data 中至少有 size 个字节
+        let result = self.pending_data.drain(..size).collect(); // 取出前 size 个字节
+        Ok(result)
     }
 
 
