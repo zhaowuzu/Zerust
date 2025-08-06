@@ -1,24 +1,42 @@
-/*连接管理*/
+//! # 连接管理模块
+//!
+//! 该模块负责管理TCP连接的生命周期和数据传输，包括读取请求、发送响应等操作。
+//! 它是服务器与客户端之间通信的桥梁，处理底层的网络IO操作。
 
-use tokio::{
-    io::{AsyncReadExt, AsyncWriteExt},
-    net::TcpStream,
-};
+use tokio::{io::{AsyncReadExt, AsyncWriteExt}, net::TcpStream};
 use crate::{error::ZerustError, datapack::DataPack, request::Request, response::Response};
 use std::net::SocketAddr;
 
+/// 表示一个TCP连接
+///
+/// `Connection` 封装了一个TCP流和相关的缓冲区，提供了读取请求和发送响应的方法。
+/// 它负责处理底层的网络IO操作，并将原始字节数据转换为应用层的请求和响应对象。
 pub struct Connection {
-    stream : TcpStream,
-    pending_data:Vec<u8>, // 用于存放从流中读取但尚未被应用层处理的数据
+    /// TCP流，用于与客户端进行网络通信
+    stream: TcpStream,
+    /// 用于存放从流中读取但尚未被应用层处理的数据
+    pending_data: Vec<u8>,
 }
 
 impl Connection {
-    const HEADER_SIZE : usize = 8; // msg_id(4) + data_len(4)
+    /// 消息头部大小常量，单位为字节
+    /// 
+    /// 消息头由两部分组成：
+    /// * 4字节的消息ID (msg_id)
+    /// * 4字节的数据长度 (data_len)
+    const HEADER_SIZE: usize = 8; // msg_id(4) + data_len(4)
 
-    pub fn new(stream: TcpStream)-> Self {
+    /// 创建一个新的连接实例
+    ///
+    /// # 参数
+    /// * `stream` - TCP流，用于与客户端进行网络通信
+    ///
+    /// # 返回值
+    /// 返回一个新的 `Connection` 实例
+    pub fn new(stream: TcpStream) -> Self {
         Self {
             stream,
-            pending_data:Vec::new(),
+            pending_data: Vec::new(),
         }
     }
 

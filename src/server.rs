@@ -1,21 +1,44 @@
-/*服务器核心*/
-/*
-TCP 服务器基础
-主要开启TCP监听端口，接收客户端连接
-*/
+//! # 服务器核心模块
+//!
+//! 该模块提供了TCP服务器的核心功能，包括监听连接、处理请求和响应等。
+//! 它是框架的主要入口点，负责协调各个组件的工作。
+//!
+//! ## 主要功能
+//!
+//! * 绑定并监听TCP端口
+//! * 接收客户端连接
+//! * 为每个连接创建独立的异步任务
+//! * 协调路由器和连接管理器的工作
+
 use std::sync::Arc;
 use tokio::net::{TcpStream, TcpListener};
 use crate::{error::ZerustError, router::Router, connection::Connection};
 
-pub struct Server{
-    addr : String,
-    router :Arc<dyn Router+Send+Sync> // Arc 可以在多个线程建安全的共享数据，在这里主要是共享 Router 实例
+/// 表示一个TCP服务器
+///
+/// `Server` 是框架的主要入口点，负责监听TCP连接并处理客户端请求。
+/// 它使用 `Router` 来分发请求，使用 `Connection` 来管理客户端连接。
+pub struct Server {
+    /// 服务器监听的地址，格式为 "IP:端口"
+    addr: String,
+    /// 路由器实例，用于分发请求到对应的处理函数
+    /// 
+    /// 使用 `Arc` 包装，可以在多个线程间安全地共享数据
+    router: Arc<dyn Router + Send + Sync>
 }
 
-impl Server{
-    pub fn new(addr:&str,router:Arc<dyn Router+Send+Sync>) -> Self{
-        Self{
-            addr:addr.to_string(),
+impl Server {
+    /// 创建一个新的服务器实例
+    ///
+    /// # 参数
+    /// * `addr` - 服务器监听的地址，格式为 "IP:端口"
+    /// * `router` - 路由器实例，用于分发请求到对应的处理函数
+    ///
+    /// # 返回值
+    /// 返回一个新的 `Server` 实例
+    pub fn new(addr: &str, router: Arc<dyn Router + Send + Sync>) -> Self {
+        Self {
+            addr: addr.to_string(),
             router,
         }
     }

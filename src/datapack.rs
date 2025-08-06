@@ -1,15 +1,28 @@
-/*协议编解码
-协议格式：假设消息由一个 8 字节的头部和一个可变长度的数据部分组成。
-头部 (8 bytes)：
-前 4 字节：msg_id (u32, Little-Endian)
-后 4 字节：data_len (u32, Little-Endian)，表示后续数据的字节长度。
-数据部分：紧接着头部，长度为 data_len 字节的原始数据。
-*/
+//! # 协议编解码模块
+//!
+//! 该模块负责处理网络通信中的数据打包和解包操作，实现了自定义的二进制协议。
+//! 
+//! ## 协议格式
+//! 
+//! 消息由一个 8 字节的头部和一个可变长度的数据部分组成：
+//! 
+//! ### 头部 (8 bytes)
+//! * 前 4 字节：`msg_id` (u32, Little-Endian) - 消息ID，用于标识消息类型
+//! * 后 4 字节：`data_len` (u32, Little-Endian) - 表示后续数据部分的字节长度
+//! 
+//! ### 数据部分
+//! * 紧接着头部，长度为 `data_len` 字节的原始数据
+//! 
+//! 该协议设计简单高效，适用于各种网络通信场景。
 
 use crate::error::ZerustError;
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
-use std::io::{Cursor};
+use std::io::Cursor;
 
+/// 数据包处理工具
+///
+/// 提供了消息打包和解包的静态方法，用于实现自定义二进制协议。
+/// 该结构体不需要实例化，所有方法都是静态方法。
 pub struct DataPack;
 
 impl DataPack {

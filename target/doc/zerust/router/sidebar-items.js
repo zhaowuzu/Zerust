@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["DefaultRouter"],"trait":["Router"],"type":["Handler"]};
