@@ -129,11 +129,8 @@ impl Server {
                 }
             };
 
-            // 使用路由器处理请求并生成响应
             let resp = router.handle(&req);
-
-            // 发送HTTP响应给客户端
-            conn.send_reponse(resp).await?;
+            conn.send_response(&resp).await?;
         }
     }
 
