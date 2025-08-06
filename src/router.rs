@@ -45,6 +45,28 @@ impl DefaultRouter {
     ///
     /// # 返回值
     /// 返回一个新的 `DefaultRouter` 实例，其中包含一个空的路由表
+    ///
+    /// # 示例
+    ///
+    /// ```rust
+    /// use zerust::{DefaultRouter, Response, Request};
+    /// use std::sync::Arc;
+    ///
+    /// // 创建路由器
+    /// let router = Arc::new(DefaultRouter::new());
+    ///
+    /// // 添加路由处理
+    /// router.add_route(1, |req| {
+    ///     println!("处理消息ID为1的请求");
+    ///     Response::new(req.msg_id(), b"Hello, World!".to_vec())
+    /// });
+    ///
+    /// // 添加另一个路由处理
+    /// router.add_route(2, |req| {
+    ///     println!("处理消息ID为2的请求");
+    ///     Response::new(req.msg_id(), b"Echo: ".iter().chain(req.data().iter()).cloned().collect())
+    /// });
+    /// ```
     pub fn new() -> Self {
         Self {
             routes: DashMap::new(),

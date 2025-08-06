@@ -49,6 +49,31 @@ impl Server {
     /// 都会创建一个异步任务来处理请求。如果在监听过程中发生IO错误，
     /// 函数会立即返回错误。
     ///
+    /// # 示例
+    ///
+    /// ```rust
+    /// use zerust::{Server, DefaultRouter, Response, Request};
+    /// use std::sync::Arc;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     // 创建路由器
+    ///     let router = Arc::new(DefaultRouter::new());
+    ///
+    ///     // 添加路由处理
+    ///     router.add_route(1, |req| {
+    ///         println!("Received request: {:?}", req.data());
+    ///         Response::new(req.msg_id(), req.data().to_vec())
+    ///     });
+    ///
+    ///     // 启动服务器
+    ///     let server = Server::new("127.0.0.1:8080", router);
+    ///     server.run().await?
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
     /// # 返回值
     ///
     /// * `Ok(())` - 服务器正常启动并运行
