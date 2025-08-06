@@ -21,7 +21,7 @@ Zerust 是一个轻量级的 Rust 网络框架，灵感来源于 Go 语言的 Zi
 
 ```toml
 [dependencies]
-zerust = "0.1.0"
+zerust = "1.0.0"
 ```
 
 ## 使用示例
