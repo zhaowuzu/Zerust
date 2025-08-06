@@ -43,7 +43,7 @@
 //! 
 //!     // 启动服务器
 //!     let server = Server::new("127.0.0.1:8080", router);
-//!     server.run().await?
+//!     server.run().await?;
 //! 
 //!     Ok(())
 //! }

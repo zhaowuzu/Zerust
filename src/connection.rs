@@ -125,30 +125,6 @@ impl Connection {
     ///
     /// # 异常
     /// * 当网络写入失败时会返回ZerustError错误
-    ///
-    /// # 示例
-    ///
-    /// ```rust,no_run
-    /// use zerust::{Connection, Response};
-    /// use tokio::net::TcpStream;
-    ///
-    /// #[tokio::main]
-    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     // 连接到服务器
-    ///     let stream = TcpStream::connect("127.0.0.1:8080").await?;
-    ///     let mut connection = Connection::new(stream);
-    ///     
-    ///     // 读取请求
-    ///     let request = connection.read_request().await?;
-    ///     println!("收到请求: 消息ID={}, 数据长度={}", request.msg_id(), request.data().len());
-    ///     
-    ///     // 创建并发送响应
-    ///     let response = Response::new(request.msg_id(), b"Hello, Client!".to_vec());
-    ///     connection.send_response(&response).await?;
-    ///     
-    ///     Ok(())
-    /// }
-    /// ```
     pub async fn send_response(&mut self, resp: &Response) -> Result<(), ZerustError> {
         // 将响应消息打包成字节数据
         let bytes = DataPack::pack(resp.msg_id(), resp.data());

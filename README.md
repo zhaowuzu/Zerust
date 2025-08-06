@@ -82,6 +82,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 ```bash
 cargo doc --open
 ```
+也可以参考已发布的文档：[https://crates.io/crates/zerust](https://crates.io/crates/zerust)
 
 所有的源代码文件都包含详细的文档注释，包括模块、结构体、方法和函数的说明，以及使用示例。
 

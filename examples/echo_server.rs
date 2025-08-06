@@ -1,4 +1,4 @@
-use zerust::{Server,DefaultRouter,Response,Request};
+use zerust::{Server,DefaultRouter,Response};
 use std::sync::Arc;
 
 /*

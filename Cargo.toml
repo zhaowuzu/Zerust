@@ -1,10 +1,11 @@
 [package]
 name = "zerust"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2024"
 authors = ["wuzu zhao yitongwuzu1992@gmail.com"]
 description = "Zero-cost Zinx for Rust"
 license = "MIT"
+repository = "https://github.com/zhaowuzu/Zerust"
 
 [dependencies]
 thiserror = "2.0.12"
