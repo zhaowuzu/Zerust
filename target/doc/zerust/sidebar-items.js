@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["connection","datapack","error","request","response","router","server"]};

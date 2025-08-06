@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["EntryRef"],"struct":["OccupiedEntryRef","VacantEntryRef"]};
