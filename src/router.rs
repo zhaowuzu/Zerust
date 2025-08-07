@@ -94,6 +94,13 @@ impl DefaultRouter {
     }
 }
 
+/// 为 `DefaultRouter` 实现 `Default` trait
+impl Default for DefaultRouter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// 为 `DefaultRouter` 实现 `Router` trait
 impl Router for DefaultRouter {
     /// 处理请求并生成响应

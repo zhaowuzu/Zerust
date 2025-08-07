@@ -66,8 +66,8 @@ impl Server {
                     let router = self.router.clone();
                     tokio::spawn(async move {
                         if let Err(e) = Self::handle_connection(stream, router).await {
-                            eprintln!("[Zerust] Error handling connection: {}", e);
-                        }
+                        eprintln!("[Zerust] Error handling connection: {e}");
+                    }
                     });
                 }
                 Err(e) => return Err(ZerustError::IoError(e)),
@@ -98,7 +98,7 @@ impl Server {
             let req = match conn.read_request().await {
                 Ok(req) => req,
                 Err(e) => {
-                    println!("[Zerust] Error reading request: {:?}", e);
+                    println!("[Zerust] Error reading request: {e:?}");
                     return Err(e);
                 }
             };
