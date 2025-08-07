@@ -10,9 +10,9 @@
 //! * 为每个连接创建独立的异步任务
 //! * 协调路由器和连接管理器的工作
 
+use crate::{connection::Connection, error::ZerustError, router::Router};
 use std::sync::Arc;
-use tokio::net::{TcpStream, TcpListener};
-use crate::{error::ZerustError, router::Router, connection::Connection};
+use tokio::net::{TcpListener, TcpStream};
 
 /// 表示一个TCP服务器
 ///
@@ -22,9 +22,9 @@ pub struct Server {
     /// 服务器监听的地址，格式为 "IP:端口"
     addr: String,
     /// 路由器实例，用于分发请求到对应的处理函数
-    /// 
+    ///
     /// 使用 `Arc` 包装，可以在多个线程间安全地共享数据
-    router: Arc<dyn Router + Send + Sync>
+    router: Arc<dyn Router + Send + Sync>,
 }
 
 impl Server {
@@ -53,7 +53,7 @@ impl Server {
     ///
     /// * `Ok(())` - 服务器正常启动并运行
     /// * `Err(ZerustError)` - 服务器启动或运行过程中发生错误
-    pub async fn run(&self)->Result<(),ZerustError>{
+    pub async fn run(&self) -> Result<(), ZerustError> {
         // 绑定TCP监听器到指定地址
         let listener = TcpListener::bind(&self.addr).await?;
         println!("[Zerust] Server listening on {}", self.addr);
@@ -70,11 +70,10 @@ impl Server {
                         }
                     });
                 }
-                Err(e)=> return Err(ZerustError::IoError(e))
+                Err(e) => return Err(ZerustError::IoError(e)),
             }
         }
     }
-
 
     /// 处理TCP连接的异步函数
     ///
@@ -89,14 +88,14 @@ impl Server {
     async fn handle_connection(
         stream: TcpStream,
         router: Arc<dyn Router>,
-    )-> Result<(), ZerustError>{
+    ) -> Result<(), ZerustError> {
         let mut conn = Connection::new(stream);
         println!("[Zerust] New connection from {:?}", conn.remote_addr());
 
         // 持续处理来自同一连接的多个请求
         loop {
             // 读取客户端发送的HTTP请求
-            let req = match conn.read_request().await{
+            let req = match conn.read_request().await {
                 Ok(req) => req,
                 Err(e) => {
                     println!("[Zerust] Error reading request: {:?}", e);
@@ -108,5 +107,4 @@ impl Server {
             conn.send_response(&resp).await?;
         }
     }
-
 }

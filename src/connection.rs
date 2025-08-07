@@ -3,9 +3,12 @@
 //! 该模块负责管理TCP连接的生命周期和数据传输，包括读取请求、发送响应等操作。
 //! 它是服务器与客户端之间通信的桥梁，处理底层的网络IO操作。
 
-use tokio::{io::{AsyncReadExt, AsyncWriteExt}, net::TcpStream};
-use crate::{error::ZerustError, datapack::DataPack, request::Request, response::Response};
+use crate::{datapack::DataPack, error::ZerustError, request::Request, response::Response};
 use std::net::SocketAddr;
+use tokio::{
+    io::{AsyncReadExt, AsyncWriteExt},
+    net::TcpStream,
+};
 
 /// 表示一个TCP连接
 ///
@@ -20,7 +23,7 @@ pub struct Connection {
 
 impl Connection {
     /// 消息头部大小常量，单位为字节
-    /// 
+    ///
     /// 消息头由两部分组成：
     /// * 4字节的消息ID (msg_id)
     /// * 4字节的数据长度 (data_len)
@@ -52,13 +55,10 @@ impl Connection {
     /// # 错误处理
     ///
     /// 当底层IO操作出现错误时，会将IO错误转换为ZerustError::IoError返回
-    pub fn remote_addr(&self) ->Result<SocketAddr,ZerustError>{
+    pub fn remote_addr(&self) -> Result<SocketAddr, ZerustError> {
         // 获取对端地址，如果出现IO错误则转换为ZerustError
-        self.stream
-            .peer_addr()
-            .map_err(ZerustError::IoError)
+        self.stream.peer_addr().map_err(ZerustError::IoError)
     }
-
 
     /// 从连接中异步读取一个完整的请求消息
     ///
@@ -69,20 +69,19 @@ impl Connection {
     ///
     /// * `Result<Request, ZerustError>` - 成功时返回解析出的请求对象，失败时返回错误信息
     ///
-    pub async fn read_request(&mut self) -> Result<Request,ZerustError>{
+    pub async fn read_request(&mut self) -> Result<Request, ZerustError> {
         // 读取消息头
         let header_bytes = self.read_exact(Self::HEADER_SIZE).await?;
         // 解析消息头
-        let(msg_id,data_len) = DataPack::unpack_header(&header_bytes)?;
+        let (msg_id, data_len) = DataPack::unpack_header(&header_bytes)?;
         // 读取消息体
         let data = if data_len > 0 {
             self.read_exact(data_len as usize).await?
         } else {
             Vec::new()
         };
-        Ok(Request::new(msg_id,data))
+        Ok(Request::new(msg_id, data))
     }
-
 
     /// 从流中精确读取指定数量的字节数据
     ///
@@ -112,7 +111,6 @@ impl Connection {
         Ok(result)
     }
 
-
     /// 发送响应消息
     ///
     /// 将响应消息打包并发送到网络流中
@@ -132,5 +130,4 @@ impl Connection {
         self.stream.write_all(&bytes).await?;
         Ok(())
     }
-
 }

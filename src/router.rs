@@ -37,7 +37,7 @@ pub type Handler = Box<dyn Fn(&Request) -> Response + Send + Sync>;
 /// `DashMap` 是一个线程安全的哈希表，适合在多线程环境中使用。
 pub struct DefaultRouter {
     /// 存储消息ID到处理函数的映射
-    routes: DashMap<u32, Handler>
+    routes: DashMap<u32, Handler>,
 }
 
 impl DefaultRouter {

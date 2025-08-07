@@ -12,8 +12,7 @@ use thiserror::Error;
 /// 无效的消息头格式以及协议错误等。通过实现 `Error` 和 `Debug` trait，
 /// 使得错误可以方便地打印和处理。
 #[derive(Error, Debug)] // 为 ZerustError 自动完成Error, Display, Debug 等 trait 的实现
-pub enum ZerustError{
-
+pub enum ZerustError {
     /// IO错误，包装了标准库中的 `io::Error`
     ///
     /// 当底层IO操作（如网络读写）失败时会返回此错误。
