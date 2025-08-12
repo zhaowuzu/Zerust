@@ -13,6 +13,7 @@
 use crate::{connection::Connection, error::ZerustError, router::Router};
 use std::sync::Arc;
 use tokio::net::{TcpListener, TcpStream};
+use tokio::sync::oneshot;
 
 /// 表示一个TCP服务器
 ///
@@ -49,28 +50,45 @@ impl Server {
     /// 都会创建一个异步任务来处理请求。如果在监听过程中发生IO错误，
     /// 函数会立即返回错误。
     ///
+    /// # 参数
+    ///
+    /// * `shutdown`: 接收关闭信号的通道。当发送端被 drop 或发送消息时，服务器将关闭。
+    ///
     /// # 返回值
     ///
     /// * `Ok(())` - 服务器正常启动并运行
     /// * `Err(ZerustError)` - 服务器启动或运行过程中发生错误
-    pub async fn run(&self) -> Result<(), ZerustError> {
+    pub async fn run(&self, mut shutdown: oneshot::Receiver<()>) -> Result<(), ZerustError> {
         // 绑定TCP监听器到指定地址
         let listener = TcpListener::bind(&self.addr).await?;
         println!("[Zerust] Server listening on {}", self.addr);
 
         // 持续接受并处理客户端连接
         loop {
-            match listener.accept().await {
-                Ok((stream, _)) => {
-                    // 为每个连接创建独立的异步任务进行处理
-                    let router = self.router.clone();
-                    tokio::spawn(async move {
-                        if let Err(e) = Self::handle_connection(stream, router).await {
-                            eprintln!("[Zerust] Error handling connection: {e}");
+            // 使用tokio::select! 同时监听：
+            // 1. 新的客户端连接
+            // 2. 关闭信息
+            tokio::select! {
+                // 分支1 ：接收新连接
+                accept_result = listener.accept() =>{
+                    match accept_result {
+                        Ok((stream, addr)) => {
+                            // 为每个连接创建独立的异步任务进行处理
+                            let router = self.router.clone();
+                            tokio::spawn(async move {
+                                if let Err(e) = Self::handle_connection(stream, router).await {
+                                    eprintln!("[Zerust] Error handling connection from {}: {e}",addr);
+                                }
+                            });
                         }
-                    });
+                        Err(e) => return Err(ZerustError::IoError(e)),
+                     }
                 }
-                Err(e) => return Err(ZerustError::IoError(e)),
+                // 分支2 : 接受关闭信号
+                _ = &mut shutdown =>{
+                    println!("[Zerust] Shutdown signal received. Stopping server...");
+                    break Ok(()) // 退出 loop，结束 run
+                }
             }
         }
     }
