@@ -71,7 +71,7 @@ impl Server {
                 // 分支1 ：接收新连接
                 accept_result = listener.accept() =>{
                     match accept_result {
-                        Ok((stream, addr)) => {
+                        Ok((stream, _addr)) => {
                             // 为每个连接创建独立的异步任务进行处理
                             let router = self.router.clone();
                             tokio::spawn(async move {
