@@ -61,7 +61,6 @@ impl Server {
     pub async fn run(&self, mut shutdown: oneshot::Receiver<()>) -> Result<(), ZerustError> {
         // 绑定TCP监听器到指定地址
         let listener = TcpListener::bind(&self.addr).await?;
-        println!("[Zerust] Server listening on {}", self.addr);
 
         // 持续接受并处理客户端连接
         loop {
@@ -76,9 +75,7 @@ impl Server {
                             // 为每个连接创建独立的异步任务进行处理
                             let router = self.router.clone();
                             tokio::spawn(async move {
-                                if let Err(e) = Self::handle_connection(stream, router).await {
-                                    eprintln!("[Zerust] Error handling connection from {}: {e}",addr);
-                                }
+                                let _ = Self::handle_connection(stream, router).await;
                             });
                         }
                         Err(e) => return Err(ZerustError::IoError(e)),
@@ -86,7 +83,6 @@ impl Server {
                 }
                 // 分支2 : 接受关闭信号
                 _ = &mut shutdown =>{
-                    println!("[Zerust] Shutdown signal received. Stopping server...");
                     break Ok(()) // 退出 loop，结束 run
                 }
             }
@@ -108,7 +104,6 @@ impl Server {
         router: Arc<dyn Router>,
     ) -> Result<(), ZerustError> {
         let mut conn = Connection::new(stream);
-        println!("[Zerust] New connection from {:?}", conn.remote_addr());
 
         // 持续处理来自同一连接的多个请求
         loop {
@@ -116,7 +111,6 @@ impl Server {
             let req = match conn.read_request().await {
                 Ok(req) => req,
                 Err(e) => {
-                    println!("[Zerust] Error reading request: {e:?}");
                     return Err(e);
                 }
             };

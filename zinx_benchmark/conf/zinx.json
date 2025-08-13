@@ -1,0 +1,7 @@
+{
+    "Name": "ZinxBenchmarkServer",
+    "Host": "0.0.0.0",
+    "TcpPort": 9999,
+    "MaxConn": 12000,
+    "MaxPacketSize": 4096
+}
